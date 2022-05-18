@@ -17,10 +17,10 @@ function Routes() {
 	return (
 		<Switch>
 			<Route exact={true} path='/'>
-				<Reservations />
+				<Dashboard />
 			</Route>
-			<Route exact={true} path='/reservations'>
-				<Redirect to={'/dashboard'} />
+			<Route path='/reservations'>
+				<Reservations />
 			</Route>
 			<Route path='/dashboard'>
 				<Dashboard date={today()} />
