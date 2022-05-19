@@ -7,7 +7,7 @@ const asyncError = require('../errors/asyncErrorBoundary');
  */
 const tableNameIsFullLength = (req, res, next) => {
 	const { table_name } = req.body.data;
-	if (table_name.length > 1 && table_name.length >= 255) return next();
+	if (table_name.length > 1 && table_name.length <= 255) return next();
 	next({
 		status: 400,
 		message: 'table_name value should be at least 2 characters long',
