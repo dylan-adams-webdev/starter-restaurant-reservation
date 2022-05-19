@@ -77,11 +77,8 @@ function reservationDateIsInFuture(req, res, next) {
 		`${reservation_date} ${reservation_time}`,
 		'YYYY-MM-DD HH:mm:ss'
 	);
-	const now = new Date();
-	console.log('resDate', typeof resDate);
-	console.log('now', typeof now);
-	const isFuture = dates.subtract(resDate, now).toMinutes() > 0;
-	
+	const isFuture = dates.subtract(resDate, new Date()).toMinutes() > 0;
+
 	if (isFuture) {
 		res.locals.res_datetime_obj = resDate;
 		return next();
@@ -94,8 +91,18 @@ function reservationDateIsInFuture(req, res, next) {
 
 function reservationIsValidTimeframe(req, res, next) {
 	const { res_datetime_obj } = res.locals;
-	if (res_datetime_obj.getDay() !== 2) return next();
-	next({ status: 400, message: 'restaurant is closed on reservation_date' });
+	const isBusinessDay = res_datetime_obj.getDay() !== 2;
+	const resTime = res_datetime_obj.getTime();
+	const isBusinessHours =
+		resTime > new Date(res_datetime_obj).setHours(10, 30) &&
+		resTime < new Date(res_datetime_obj).setHours(21, 30);
+	const isDuringOpenHours = isBusinessDay && isBusinessHours;
+	if (isDuringOpenHours) return next();
+	next({
+		status: 400,
+		message:
+			'reservation date and time must be between restaurant open and 60 minutes before close',
+	});
 }
 
 function reservationHasValidPartySize(req, res, next) {
