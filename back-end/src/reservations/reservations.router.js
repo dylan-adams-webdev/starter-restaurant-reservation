@@ -14,4 +14,10 @@ router
 	.post(controller.create)
 	.all(methodNotAllowed);
 
+// prettier-ignore
+router
+	.route('/:reservationId')
+	.get(controller.read)
+	.all(methodNotAllowed);
+
 module.exports = router;

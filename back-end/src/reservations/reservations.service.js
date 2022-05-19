@@ -20,7 +20,17 @@ const create = (data) => {
 		.then((res) => res[0]);
 };
 
+/**
+ * Return a reservation from db
+ */
+const read = (reservation_id) => {
+	return knex('reservations')
+		.where({ reservation_id })
+		.first();
+}
+
 module.exports = {
 	list,
 	create,
+	read,
 };
