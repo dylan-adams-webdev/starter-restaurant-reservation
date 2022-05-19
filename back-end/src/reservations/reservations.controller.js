@@ -1,6 +1,7 @@
 const dates = require('date-and-time');
 const service = require('./reservations.service');
-const error = require('../errors/asyncErrorBoundary');
+const validator = require('../common/validations');
+const asyncError = require('../errors/asyncErrorBoundary');
 
 /**
  * List handler for reservation resources
@@ -9,24 +10,6 @@ async function list(req, res) {
 	let date = req.query.date || dates.format(new Date(), 'YYYY-MM-DD');
 	const data = await service.list(date);
 	res.json({ data: data });
-}
-
-function bodyNotEmpty(req, res, next) {
-	if (req.body.data) return next();
-	next({ status: 400, message: 'No data in request' });
-}
-
-/**
- * Validator for body data.
- * If included prop is missing, respond with error status and message.
- */
-function dataIncludesProp(prop) {
-	return (req, res, next) => {
-		const { data = {} } = req.body;
-		console.log('data:', data);
-		if (data[prop]) return next();
-		return next({ status: 400, message: `Body must include ${prop}` });
-	};
 }
 
 /**
@@ -120,22 +103,23 @@ async function create(req, res) {
 		data: { reservation_id: result, ...req.body.data },
 	});
 }
+
 module.exports = {
-	list: error(list),
+	list: asyncError(list),
 	create: [
-		bodyNotEmpty,
-		dataIncludesProp('first_name'),
-		dataIncludesProp('last_name'),
-		dataIncludesProp('mobile_number'),
-		dataIncludesProp('reservation_date'),
-		dataIncludesProp('reservation_time'),
-		dataIncludesProp('people'),
+		validator.bodyNotEmpty,
+		validator.dataIncludesProp('first_name'),
+		validator.dataIncludesProp('last_name'),
+		validator.dataIncludesProp('mobile_number'),
+		validator.dataIncludesProp('reservation_date'),
+		validator.dataIncludesProp('reservation_time'),
+		validator.dataIncludesProp('people'),
 		includesValidMobileNumber,
 		reservationDateFormatIsValid,
 		reservationTimeFormatIsValid,
 		reservationDateIsInFuture,
 		reservationIsValidTimeframe,
 		reservationHasValidPartySize,
-		error(create),
+		asyncError(create),
 	],
 };
