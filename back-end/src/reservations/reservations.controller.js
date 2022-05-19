@@ -54,11 +54,6 @@ function reservationDateFormatIsValid(req, res, next) {
 }
 
 /**
- * Validator for reservation_date.
- * Dat must be in the future and on 
- */
-
-/**
  * Validator for reservation_time.
  * Time must be formatted 'HH:MM:SS'
  */
@@ -69,6 +64,38 @@ function reservationTimeFormatIsValid(req, res, next) {
 		status: 400,
 		message: 'reservation_time must be formatted "HH:mm:ss"',
 	});
+}
+
+/**
+ * Validator for reservation_date and reservation_time.
+ * Date and time must both be in the future.
+ * Date and time is valid if reservation is at least 1 minute in the future.
+ */
+function reservationDateIsInFuture(req, res, next) {
+	const { reservation_date, reservation_time } = req.body.data;
+	const resDate = dates.parse(
+		`${reservation_date} ${reservation_time}`,
+		'YYYY-MM-DD HH:mm:ss'
+	);
+	const now = new Date();
+	console.log('resDate', typeof resDate);
+	console.log('now', typeof now);
+	const isFuture = dates.subtract(resDate, now).toMinutes() > 0;
+	
+	if (isFuture) {
+		res.locals.res_datetime_obj = resDate;
+		return next();
+	}
+	next({
+		status: 400,
+		message: 'reservation_date and reservation_time must be in future',
+	});
+}
+
+function reservationIsValidTimeframe(req, res, next) {
+	const { res_datetime_obj } = res.locals;
+	if (res_datetime_obj.getDay() !== 2) return next();
+	next({ status: 400, message: 'restaurant is closed on reservation_date' });
 }
 
 function reservationHasValidPartySize(req, res, next) {
@@ -97,8 +124,10 @@ module.exports = {
 		dataIncludesProp('reservation_time'),
 		dataIncludesProp('people'),
 		includesValidMobileNumber,
-		reservationDateIsValid,
-		reservationTimeIsValid,
+		reservationDateFormatIsValid,
+		reservationTimeFormatIsValid,
+		reservationDateIsInFuture,
+		reservationIsValidTimeframe,
 		reservationHasValidPartySize,
 		error(create),
 	],
