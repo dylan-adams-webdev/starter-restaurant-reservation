@@ -1,3 +1,4 @@
+import React from 'react';
 import { Link } from 'react-router-dom';
 
 /**
@@ -31,7 +32,7 @@ function Menu() {
 						<h5
 							className='offcanvas-title'
 							id='offcanvasNavbarLabel'>
-							Periodic Tables
+							Menu
 						</h5>
 						<button
 							type='button'
