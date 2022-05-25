@@ -3,7 +3,6 @@ import { useState } from 'react';
 import { useHistory } from 'react-router';
 
 export default function ReservationForm(props) {
-	
 	const {
 		initialState = {
 			first_name: '',
@@ -15,25 +14,29 @@ export default function ReservationForm(props) {
 		},
 		submitHandler,
 	} = props;
-	
+
 	const history = useHistory();
 
 	const [formData, setFormData] = useState(initialState);
-	const [errors, setErrors] = useState(null);
-	
+
 	const changeHandler = ({ target }) => {
 		setFormData({ ...formData, [target.name]: target.value });
 	};
 	
+	const integerChangeHandler = ({ target }) => {
+		setFormData({ ...formData, [target.name]: parseInt(target.value) });
+	}
+
 	const onSubmit = (event) => {
 		event.preventDefault();
+		console.log(formData);
 		submitHandler(formData);
-	}
+	};
 
 	const cancelHandler = () => {
 		history.goBack();
 	};
-	
+
 	return (
 		<form onSubmit={onSubmit} className='g-4'>
 			<div className='row mb-2'>
@@ -111,7 +114,7 @@ export default function ReservationForm(props) {
 						name='people'
 						className='form-control'
 						id='people'
-						onChange={changeHandler}
+						onChange={integerChangeHandler}
 						value={formData.people}
 						required
 					/>
