@@ -133,7 +133,7 @@ const reservationExists = async (req, res, next) => {
  */
 const read = (req, res) => {
 	res.json({ data: res.locals.reservation });
-}
+};
 
 module.exports = {
 	list: asyncError(list),
