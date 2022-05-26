@@ -1,7 +1,11 @@
 import React from 'react';
-import { formatAsDate, formatAsTime } from '../utils/date-time';
+import { DateTime as dt, Duration } from 'luxon';
 
 export default function ReservationCard({ res }) {
+	const date = dt.fromISO(res.reservation_date);
+	const time = Duration.fromISOTime(res.reservation_time);
+	const dateTime = date.plus(time);
+
 	return (
 		<div className='col'>
 			<div className='card'>
@@ -10,18 +14,17 @@ export default function ReservationCard({ res }) {
 						{res.first_name} {res.last_name}
 					</h5>
 					<h6 className='card-subtitle mt-1 mb-2 text-muted'>
-						{formatAsDate(res.reservation_date)}{' '}
-						{formatAsTime(res.reservation_time)}
+						{dateTime.toLocaleString(dt.DATETIME_FULL)}
 					</h6>
 					<div className='card-text'>
-						<ul className='list-group list-group-flush'>
-							<li className='list-group-item'>
-								Mobile Number: {res.mobile_number}
-							</li>
-							<li className='list-group-item'>
-								Party: {res.people}
-							</li>
-						</ul>
+						<div>
+							<span className='oi oi-phone'></span>
+							&nbsp;{res.mobile_number}
+						</div>
+						<div>
+							<span className='oi oi-people'></span>
+							&nbsp;{res.people}
+						</div>
 					</div>
 				</div>
 			</div>

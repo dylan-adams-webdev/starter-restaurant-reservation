@@ -11,7 +11,7 @@ import { DateTime as dt } from 'luxon';
  * @returns {JSX.Element}
  */
 export default function Dashboard() {
-	const hx = useHistory();
+const hx = useHistory();
 	const { search } = hx.location;
 	const queryParam = new URLSearchParams(search).get('date');
 	const initialDate = queryParam || dt.now().toISODate();
@@ -34,7 +34,7 @@ export default function Dashboard() {
 			.catch(setReservationsError);
 		return () => abortController.abort();
 	}
-	
+
 	function updateSearchQuery() {
 		hx.push({ pathname: '/dashboard', search: `?date=${dateString}` });
 	}
@@ -59,7 +59,7 @@ export default function Dashboard() {
 	const reservationViewDate = dt.fromISO(dateString).hasSame(dt.now(), 'day')
 		? 'today'
 		: dt.fromISO(dateString).toLocaleString(dt.DATE_HUGE);
-		
+
 	return (
 		<main>
 			<ErrorAlert error={reservationsError} />
@@ -69,7 +69,9 @@ export default function Dashboard() {
 			</div>
 			<DateButtonGroup nav={nextOrPreviousDate} today={today} />
 			<div className='row row-cols-1 row-cols-md-4 g-4 mt-2'>
-				{isLoading && !reservationsError ? '...loading' : (content.length && content) || 'no reservations'}
+				{isLoading && !reservationsError
+					? '...loading'
+					: (content.length && content) || 'no reservations'}
 			</div>
 		</main>
 	);
