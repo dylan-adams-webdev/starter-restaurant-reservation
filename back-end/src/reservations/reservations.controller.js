@@ -87,7 +87,7 @@ const reservationIsValidTimeframe = (req, res, next) => {
 	next({
 		status: 400,
 		message:
-			'reservation date and time must be between restaurant open and 60 minutes before close',
+			'reservation not available at this time: restaurant closed or unavailable',
 	});
 };
 
@@ -124,7 +124,7 @@ const reservationExists = async (req, res, next) => {
 	}
 	next({
 		status: 404,
-		message: `no record found matching id ${reservationId}`,
+		message: `no record found matching id ${req.params.reservationId}`,
 	});
 };
 
