@@ -1,7 +1,6 @@
 import React from 'react';
 
-export default function DateButtonGroup(props) {
-	const { nav, today } = props;
+export default function DateButtonGroup({ nav }) {
 	return (
 		<div className='btn-group' role='group' aria-label='Basic example'>
 			<button
@@ -13,7 +12,7 @@ export default function DateButtonGroup(props) {
 			<button
 				type='button'
 				className='btn btn-primary'
-				onClick={() => today()}>
+				onClick={() => nav(0)}>
 				Today
 			</button>
 			<button

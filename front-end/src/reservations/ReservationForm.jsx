@@ -20,16 +20,14 @@ export default function ReservationForm(props) {
 	const [formData, setFormData] = useState(initialState);
 
 	const changeHandler = ({ target }) => {
-		setFormData({ ...formData, [target.name]: target.value });
+		setFormData({
+			...formData,
+			[target.name]: target.value,
+		});
 	};
 	
-	const integerChangeHandler = ({ target }) => {
-		setFormData({ ...formData, [target.name]: parseInt(target.value) });
-	}
-
 	const onSubmit = (event) => {
 		event.preventDefault();
-		console.log(formData);
 		submitHandler(formData);
 	};
 
@@ -114,7 +112,7 @@ export default function ReservationForm(props) {
 						name='people'
 						className='form-control'
 						id='people'
-						onChange={integerChangeHandler}
+						onChange={changeHandler}
 						value={formData.people}
 						required
 					/>

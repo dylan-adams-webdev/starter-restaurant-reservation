@@ -52,14 +52,35 @@ async function fetchJson(url, options, onCancel) {
 	}
 }
 
-/**
- * Retrieves all existing reservation.
- * @returns {Promise<[reservation]>}
- *  a promise that resolves to a possibly empty array of reservation saved in the database.
- */
+async function create(data, signal, url) {
+	try {
+		const res = await fetch(url, {
+			method: 'POST',
+			headers,
+			body: JSON.stringify({ data: data }),
+			signal,
+		});
+		const payload = await res.json();
+		if (payload.error) return Promise.reject({ message: payload.error });
+		return payload.data;
+	} catch (err) {
+		if (err.name !== 'AbortError') {
+			throw err;
+		}
+	}
+}
 
-export async function listReservations(params, signal) {
+export async function newReservation(data, signal) {
 	const url = new URL(`${API_BASE_URL}/reservations`);
+	return create(data, signal, url);
+}
+
+export async function newTable(data, signal) {
+	const url = new URL(`${API_BASE_URL}/tables`);
+	return create(data, signal, url);
+}
+
+async function list(params, signal, url) {
 	Object.entries(params).forEach(([key, value]) =>
 		url.searchParams.append(key, value)
 	);
@@ -68,23 +89,13 @@ export async function listReservations(params, signal) {
 		.then(formatReservationTime);
 }
 
-export async function newReservation(data, signal) {
+export function listReservations(params, signal) {
 	const url = new URL(`${API_BASE_URL}/reservations`);
-	try {
-		const res = await fetch(url, {
-			method: 'POST',
-			headers,
-			body: JSON.stringify({data: data}),
-			signal,
-		});
-		const payload = await res.json();
-		console.log(payload);
-		if (payload.error) return Promise.reject({ message: payload.error });
-		return payload.data;
-	} catch (err) {
-		if (err.name !== 'AbortError') {
-			throw err;
-		}
-		return Promise.resolve();
-	}
+	return list(params, signal, url);
 }
+
+export function listTables(signal) {
+	const url = new URL(`${API_BASE_URL}/tables`);
+	return list({}, signal, url);
+}
+
