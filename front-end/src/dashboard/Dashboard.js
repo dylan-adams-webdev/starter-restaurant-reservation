@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { DateTime as dt } from 'luxon';
 import { useHistory } from 'react-router';
-import { listReservations, listTables } from '../utils/api';
+import { listReservations } from '../utils/api';
 import ErrorAlert from '../error/ErrorAlert';
 import DateButtonGroup from './DateButtonGroup';
 import ReservationList from './ReservationList';
-import TableList from './TableList';
+import { useQuery } from 'react-query';
 
 /**
  * Defines the dashboard page.
@@ -18,34 +18,13 @@ export default function Dashboard() {
 	const initialDate = queryParam || dt.now().toISODate();
 
 	const [dateString, setDateString] = useState(initialDate);
-	const [reservations, setReservations] = useState(null);
-	const [tables, setTables] = useState(null);
-	const [reservationError, setReservationError] = useState(null);
-	const [tableError, setTableError] = useState(null);
-	const [isLoading, setIsLoading] = useState(true);
+	const abort = new AbortController();
+	const { data, error, isLoading } = useQuery(
+		'reservations',
+		() => listReservations({dateString: dateString} , abort.signal)
+	);
 
 	useEffect(updateSearchQuery, [dateString, hx]);
-
-	useEffect(loadReservations, [dateString]);
-	
-	useEffect(loadTables, []);
-
-	function loadReservations() {
-		const abortController = new AbortController();
-		setError(n)
-		listReservations({ date: dateString }, abortController.signal)
-			.then(setReservations)
-			.catch((err) => {
-				abortController.abort();
-				setError(err);
-			});
-		return () => abortController.abort();
-	}
-	
-	function loadTables() {
-		const abortController = new AbortController();
-		
-	}
 
 	function updateSearchQuery() {
 		hx.push({ pathname: '/dashboard', search: `?date=${dateString}` });
@@ -76,8 +55,7 @@ export default function Dashboard() {
 				<h4 className='mb-0'>Reservations for {reservationViewDate}</h4>
 			</div>
 			<DateButtonGroup nav={nextOrPreviousDate} />
-			<ReservationList reservations={reservations} />
-			<TableList tables={tables} />
+			<ReservationList reservations={data} />
 		</main>
 	);
 }

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useHistory } from 'react-router';
 import ReservationForm from './ReservationForm';
 import ErrorAlert from '../error/ErrorAlert';
-import { newReservation } from '../utils/api';
+//import { newReservation } from '../utils/api';
 import { DateTime as dt, Duration, Interval } from 'luxon';
 
 export default function CreateReservation() {
@@ -11,30 +11,30 @@ export default function CreateReservation() {
 
 	const history = useHistory();
 
-	const submitHandler = (data) => {
-		if (error) setError(false);
-		if (!reservationDateTimeIsValid(data)) {
-			setError(
-				new Error(
-					'Reservation must be set during open hours on future date'
-				)
-			);
-		} else {
-			setIsLoading(true);
-			const abort = new AbortController();
-			newReservation(data, abort.signal)
-				.then(() =>
-					history.push({
-						pathname: '/dashboard',
-						search: `?date=${data.reservation_date}`,
-					})
-				)
-				.then(() => setIsLoading(false))
-				.catch(setError)
-				.then(setIsLoading(false));
-			return () => abort.abort();
-		}
-	};
+	// const submitHandler = (data) => {
+	// 	if (error) setError(false);
+	// 	if (!reservationDateTimeIsValid(data)) {
+	// 		setError(
+	// 			new Error(
+	// 				'Reservation must be set during open hours on future date'
+	// 			)
+	// 		);
+	// 	} else {
+	// 		setIsLoading(true);
+	// 		const abort = new AbortController();
+	// 		newReservation(data, abort.signal)
+	// 			.then(() =>
+	// 				history.push({
+	// 					pathname: '/dashboard',
+	// 					search: `?date=${data.reservation_date}`,
+	// 				})
+	// 			)
+	// 			.then(() => setIsLoading(false))
+	// 			.catch(setError)
+	// 			.then(setIsLoading(false));
+	// 		return () => abort.abort();
+	// 	}
+	// };
 
 	const reservationDateTimeIsValid = (data) => {
 		const { reservation_date, reservation_time } = data;
@@ -63,7 +63,7 @@ export default function CreateReservation() {
 		<>
 			<h1>Create Reservation</h1>
 			<ErrorAlert error={error} />
-			<ReservationForm submitHandler={submitHandler} />
+			<ReservationForm />
 		</>
 	);
 }

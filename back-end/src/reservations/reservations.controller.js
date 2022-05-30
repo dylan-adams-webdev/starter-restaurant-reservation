@@ -3,6 +3,10 @@ const service = require('./reservations.service');
 const validator = require('../common/validations');
 const asyncError = require('../errors/asyncErrorBoundary');
 
+const includesDateQueryParam = (req, res, next) => {
+	if (req.query.date) return next();
+	next({ status: 400, message: 'date must be specified via query parameter' });
+}
 /**
  * List handler for reservation resources
  */
@@ -136,7 +140,7 @@ const read = (req, res) => {
 };
 
 module.exports = {
-	list: asyncError(list),
+	list: [asyncError(list), includesDateQueryParam],
 	create: [
 		validator.bodyNotEmpty,
 		validator.dataIncludesProp('first_name'),
