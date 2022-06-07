@@ -39,7 +39,8 @@ describe('US-06 - Reservation status - E2E', () => {
 				mobile_number: '800-555-1313',
 				reservation_date: '2035-01-01',
 				reservation_time: '13:45',
-				people: 4,
+				people: 4, 
+				status: 'booked'
 			});
 
 			table = await createTable({
@@ -78,7 +79,7 @@ describe('US-06 - Reservation status - E2E', () => {
 			});
 
 			await seatReservation(reservation.reservation_id, table.table_id);
-
+		
 			await page.reload({ waitUntil: 'networkidle0' });
 
 			await page.screenshot({
@@ -120,7 +121,7 @@ describe('US-06 - Reservation status - E2E', () => {
 			await page.click(finishButtonSelector);
 
 			await page.waitForResponse((response) => {
-				return response.url().endsWith(`/tables`);
+				return response.url().endsWith(`/tables/`);
 			});
 
 			await page.screenshot({
