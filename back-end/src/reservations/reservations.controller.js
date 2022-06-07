@@ -1,19 +1,24 @@
 const dates = require('date-and-time');
 const service = require('./reservations.service');
+const common = require('../common/common.service');
 const validator = require('../common/validations');
 const asyncError = require('../errors/asyncErrorBoundary');
 
-const includesDateQueryParam = (req, res, next) => {
-	if (req.query.date) return next();
-	next({ status: 400, message: 'date must be specified via query parameter' });
-}
 /**
  * List handler for reservation resources
  */
-const list = async (req, res) => {
-	let date = req.query.date || dates.format(new Date(), 'YYYY-MM-DD');
-	const data = await service.list(date);
-	res.json({ data: data });
+const list = async (req, res, next) => {
+	const { date, mobile_number } = req.query;
+	let data;
+	if (date) {
+		data = await service.listForDate(date);
+	} else if (mobile_number) {
+		data = await service.listByPhone(mobile_number);
+	} else {
+		data = await service.listAll();
+	}
+	req.log.debug({ data });
+	res.json({ data });
 };
 
 /**
@@ -107,13 +112,25 @@ const reservationHasValidPartySize = (req, res, next) => {
 	});
 };
 
+const statusIs = (expected) => {
+	return (req, res, next) => {
+		const { status } = req.body.data;
+		if (status === expected) return next();
+		next({
+			status: 400,
+			message: `Status is '${status}' - expected '${expected}'`,
+		});
+	};
+};
+
 /**
  * Create a new reservation in db and return record with id
  */
 const create = async (req, res) => {
 	const result = await service.create(req.body.data);
+	req.log.debug(result);
 	res.status(201).json({
-		data: { reservation_id: result, ...req.body.data },
+		data: { reservation_id: result.reservation_id, ...req.body.data },
 	});
 };
 
@@ -139,8 +156,60 @@ const read = (req, res) => {
 	res.json({ data: res.locals.reservation });
 };
 
+const dataIncludesValidStatus = (req, res, next) => {
+	const { status } = req.body.data;
+	const validStatuses = ['booked', 'seated', 'finished', 'cancelled'];
+	if (validStatuses.includes(status)) {
+		return next();
+	}
+	next({
+		status: 400,
+		message: `Data has unknown status - valid status = ${validStatuses}`,
+	});
+};
+
+const reservationIsNotFinished = (req, res, next) => {
+	const { status } = res.locals.reservation;
+	req.log.debug({ status, url: req.originalUrl });
+	if (status !== 'finished') return next();
+	next({ status: 400, message: 'Cannot update a finished reservation' });
+};
+
+const updateStatus = async (req, res) => {
+	const { reservationId } = req.params;
+	const { status } = req.body.data;
+	const result = await service.updateStatus(reservationId, status);
+	req.log.debug(result);
+	res.json({ data: { status } });
+};
+
+const updateReservation = async (req, res) => {
+	const { reservationId } = req.params;
+	req.log.debug({ data: req.body.data });
+	const {
+		first_name,
+		last_name,
+		mobile_number,
+		reservation_date,
+		reservation_time,
+		people,
+	} = req.body.data;
+	const newReservation = {
+		first_name,
+		last_name,
+		mobile_number,
+		reservation_date,
+		reservation_time,
+		people,
+	};
+	const data = await service.updateReservation(reservationId, newReservation);
+	res.json({
+		data,
+	});
+};
+
 module.exports = {
-	list: [asyncError(list), includesDateQueryParam],
+	list: asyncError(list),
 	create: [
 		validator.bodyNotEmpty,
 		validator.dataIncludesProp('first_name'),
@@ -155,7 +224,33 @@ module.exports = {
 		reservationDateIsInFuture,
 		reservationIsValidTimeframe,
 		reservationHasValidPartySize,
+		statusIs('booked'),
 		asyncError(create),
 	],
 	read: [asyncError(reservationExists), read],
+	updateStatus: [
+		validator.bodyNotEmpty,
+		validator.dataIncludesProp('status'),
+		dataIncludesValidStatus,
+		asyncError(reservationExists),
+		reservationIsNotFinished,
+		asyncError(updateStatus),
+	],
+	updateReservation: [
+		reservationExists,
+		validator.bodyNotEmpty,
+		validator.dataIncludesProp('first_name'),
+		validator.dataIncludesProp('last_name'),
+		validator.dataIncludesProp('mobile_number'),
+		validator.dataIncludesProp('reservation_date'),
+		validator.dataIncludesProp('reservation_time'),
+		validator.dataIncludesProp('people'),
+		includesValidMobileNumber,
+		reservationDateFormatIsValid,
+		reservationTimeFormatIsValid,
+		reservationDateIsInFuture,
+		reservationIsValidTimeframe,
+		reservationHasValidPartySize,
+		asyncError(updateReservation),
+	],
 };
