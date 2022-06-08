@@ -13,7 +13,6 @@ function bodyNotEmpty(req, res, next) {
 function dataIncludesProp(prop) {
 	return (req, res, next) => {
 		const { data = {} } = req.body;
-		console.log('data:', data);
 		if (data[prop]) return next();
 		return next({ status: 400, message: `Body must include ${prop}` });
 	};

@@ -34,6 +34,7 @@ describe('US-08 - Change an existing reservation - E2E', () => {
 			reservation_date: '2035-01-04',
 			reservation_time: '14:00',
 			people: 4,
+			status: 'booked',
 		});
 		page = await browser.newPage();
 		await page.setViewport({ width: 1920, height: 1080 });
@@ -92,11 +93,16 @@ describe('US-08 - Change an existing reservation - E2E', () => {
 					);
 					await dialog.accept();
 				});
-
+				
 				await cancelButton.click();
 
 				await page.waitForResponse((response) => {
-					return response.url().includes('/reservations?date=');
+					// using react-query to handle api requests
+					// ask for all reservations and cache
+					// do not need to make an individual query for each date
+					
+					// return response.url().includes('/reservations?date=');
+					return response.url().includes('/reservations/');
 				});
 
 				await page.waitForTimeout(500);

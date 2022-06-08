@@ -1,13 +1,24 @@
 const knex = require('../db/connection');
 
+const listAll = () => {
+	return knex('reservations')
+		.orderBy('reservation_date', 'reservation_time')
+};
+
 /**
  * Return a promise containing all reservations
  */
-const list = (date) => {
+const listForDate = (date) => {
 	return knex('reservations')
 		.where({ reservation_date: date })
+		.whereNot({status: 'finished'})
 		.orderBy('reservation_time');
 };
+
+const listByPhone = (mobile_number) => {
+	return knex('reservations')
+		.whereLike('mobile_number', `%${mobile_number}%`);
+}
 
 /**
  * Insert a reservation into the db and return
@@ -24,13 +35,31 @@ const create = (data) => {
  * Return a reservation from db
  */
 const read = (reservation_id) => {
+	return knex('reservations').where({ reservation_id }).first();
+};
+
+const updateStatus = (reservation_id, status) => {
 	return knex('reservations')
+		.returning('status')
 		.where({ reservation_id })
-		.first();
+		.update({ status })
+		.then((res) => res[0]);
+};
+
+const updateReservation = (reservation_id, data) => {
+	return knex('reservations')
+		.returning('*')
+		.where({reservation_id})
+		.update(data)
+		.then((res) => res[0]);
 }
 
 module.exports = {
-	list,
+	listForDate,
+	listByPhone,
+	listAll,
 	create,
 	read,
+	updateStatus,
+	updateReservation
 };

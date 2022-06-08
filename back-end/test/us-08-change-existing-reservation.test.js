@@ -45,7 +45,7 @@ describe('US-08 - Change an existing reservation', () => {
 			const expected = {
 				first_name: 'Mouse',
 				last_name: 'Whale',
-				mobile_number: '1231231235',
+				mobile_number: '123-123-1235',
 				reservation_date: '2026-12-30',
 				reservation_time: '18:00',
 				people: 2,

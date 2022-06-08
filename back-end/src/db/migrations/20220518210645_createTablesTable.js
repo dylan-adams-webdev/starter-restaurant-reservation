@@ -5,6 +5,7 @@ exports.up = function (knex) {
 		table.integer('capacity').notNullable();
 		table
 			.integer('reservation_id')
+			.unique()
 			.references('reservation_id')
 			.inTable('reservations');
 		table.timestamps(true, true);

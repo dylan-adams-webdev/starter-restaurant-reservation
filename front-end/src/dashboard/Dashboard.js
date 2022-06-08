@@ -1,45 +1,43 @@
 import React, { useEffect, useState } from 'react';
-import { useHistory } from 'react-router';
-import { listReservations } from '../utils/api';
-import ErrorAlert from '../error/ErrorAlert';
-import ReservationCard from './ReservationCard';
-import DateButtonGroup from './DateButtonGroup';
 import { DateTime as dt } from 'luxon';
+import { useHistory } from 'react-router';
+import { listReservations, listTables } from '../utils/api';
+import ErrorAlert from '../error/ErrorAlert';
+import DateButtonGroup from './DateButtonGroup';
+import ReservationList from '../common/ReservationList';
+import TableList from './TableList';
+import { useQuery } from 'react-query';
 
 /**
  * Defines the dashboard page.
  * @returns {JSX.Element}
  */
 export default function Dashboard() {
-const hx = useHistory();
+	const hx = useHistory();
 	const { search } = hx.location;
 	const queryParam = new URLSearchParams(search).get('date');
 	const initialDate = queryParam || dt.now().toISODate();
 
-	const [reservations, setReservations] = useState([]);
-	const [reservationsError, setReservationsError] = useState(null);
 	const [dateString, setDateString] = useState(initialDate);
-	const [isLoading, setIsLoading] = useState(true);
 
-	useEffect(loadDashboardData, [dateString]);
+	const abort = new AbortController();
+
+	const reservations = useQuery('reservations', () =>
+		listReservations(abort.signal)
+	);
+	const tables = useQuery('tables', () => listTables(abort.signal));
+
 	useEffect(updateSearchQuery, [dateString, hx]);
-
-	function loadDashboardData() {
-		setIsLoading(true);
-		const abortController = new AbortController();
-		setReservationsError(null);
-		listReservations({ date: dateString }, abortController.signal)
-			.then(setReservations)
-			.then(() => setIsLoading(false))
-			.catch(setReservationsError);
-		return () => abortController.abort();
-	}
 
 	function updateSearchQuery() {
 		hx.push({ pathname: '/dashboard', search: `?date=${dateString}` });
 	}
 
 	function nextOrPreviousDate(value) {
+		if (!value) {
+			const now = dt.now().toISODate();
+			return setDateString(now);
+		}
 		const newDateString = dt
 			.fromISO(dateString)
 			.plus({ days: value })
@@ -47,31 +45,44 @@ const hx = useHistory();
 		setDateString(newDateString);
 	}
 
-	function today() {
-		const today = dt.now().toISODate();
-		setDateString(today);
-	}
-
-	const content = reservations.map((res) => (
-		<ReservationCard key={res.reservation_id} res={res} />
-	));
+	if (reservations.isLoading || tables.isLoading) return '...loading';
 
 	const reservationViewDate = dt.fromISO(dateString).hasSame(dt.now(), 'day')
 		? 'today'
 		: dt.fromISO(dateString).toLocaleString(dt.DATE_HUGE);
 
+	const reservationList =
+		(!reservations.error &&
+			reservations.data.data.filter((res) => {
+				const date = dt.fromISO(dateString);
+				const isSameDate = dt
+					.fromISO(res.reservation_date)
+					.hasSame(date, 'day');
+				const isNotFinished = res.status !== 'finished';
+				return isNotFinished && isSameDate;
+			})) ||
+		null;
+
+	const tableList = (!tables.error && tables.data.data) || null;
+
 	return (
 		<main>
-			<ErrorAlert error={reservationsError} />
+			<ErrorAlert error={reservations.error} />
 			<h1>Dashboard</h1>
 			<div className='d-md-flex mb-3'>
 				<h4 className='mb-0'>Reservations for {reservationViewDate}</h4>
 			</div>
-			<DateButtonGroup nav={nextOrPreviousDate} today={today} />
-			<div className='row row-cols-1 row-cols-md-4 g-4 mt-2'>
-				{isLoading && !reservationsError
-					? '...loading'
-					: (content.length && content) || 'no reservations'}
+			<DateButtonGroup nav={nextOrPreviousDate} />
+			<div className='row mt-3'>
+				<div className='col-md-9'>
+					<ReservationList
+						reservations={reservationList}
+						onEmpty={'No reservations found'}
+					/>
+				</div>
+				<div className='col-md-3'>
+					<TableList tables={tableList} />
+				</div>
 			</div>
 		</main>
 	);

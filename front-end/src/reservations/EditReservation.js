@@ -1,18 +1,24 @@
 import React, { useState } from 'react';
-import { useHistory } from 'react-router';
-import ReservationForm from '../common/ReservationForm';
+import { useHistory, useParams } from 'react-router';
 import ErrorAlert from '../error/ErrorAlert';
-import { newReservation } from '../utils/api';
+import ReservationForm from '../common/ReservationForm';
+import { editReservation, listReservations } from '../utils/api';
 import { DateTime as dt, Duration, Interval } from 'luxon';
-import { useMutation, useQueryClient } from 'react-query';
+import { useMutation, useQuery, useQueryClient } from 'react-query';
 
-export default function CreateReservation() {
+export default function EditReservation() {
+	const resId = useParams().reservation_id;
 	const queryClient = useQueryClient();
-	const { mutate, isLoading, error } = useMutation(newReservation, {
+	const abort = new AbortController();
+	const reservations = useQuery('reservations', () =>
+		listReservations(abort.signal)
+	);
+	const { mutate, isLoading, error } = useMutation(editReservation, {
 		onSuccess: (data) => {
+			const date = data.data.data.reservation_date;
 			history.push({
 				pathname: '/dashboard',
-				search: `?date=${data.data.reservation_date}`,
+				search: `?date=${dt.fromISO(date).toISODate()}`,
 			});
 		},
 		onSettled: () => {
@@ -25,7 +31,6 @@ export default function CreateReservation() {
 	const history = useHistory();
 
 	const submitHandler = (data) => {
-		data = { ...data, status: 'booked' };
 		if (validationError) setValidationError(null);
 		if (!reservationDateTimeIsValid(data)) {
 			setValidationError(
@@ -34,7 +39,7 @@ export default function CreateReservation() {
 				)
 			);
 		} else {
-			mutate(data);
+			mutate({ data });
 		}
 	};
 
@@ -59,12 +64,20 @@ export default function CreateReservation() {
 		return dateObj.plus(Duration.fromISOTime(time));
 	};
 
-	if (isLoading) return '...loading';
+	if (isLoading || reservations.isLoading) return '...loading';
+
+	const reservation = reservations.data.data.find(
+		(res) => res.reservation_id === Number(resId)
+	);
+
 	return (
 		<>
-			<h1>Create Reservation</h1>
+			<h1>Edit Reservation</h1>
 			<ErrorAlert error={validationError || error} />
-			<ReservationForm submitHandler={submitHandler} />
+			<ReservationForm
+				submitHandler={submitHandler}
+				initialState={reservation}
+			/>
 		</>
 	);
 }

@@ -46,10 +46,8 @@ export function formatAsTime(timeString) {
  *  the today's date formatted as YYYY-MM-DD
  */
 export function today() {
-	// TODO return this to 'new Date()'
-	const dateObj = new Date(2020, 11, 30);
+	const dateObj = new Date();
 	const string = asDateString(dateObj);
-	console.log('string', string);
 	return string;
 }
 

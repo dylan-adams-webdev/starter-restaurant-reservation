@@ -11,7 +11,7 @@ async function selectOptionByText(page, name, optionText) {
 }
 
 function containsText(page, selector, expected) {
-	return page.evaluate(
+	const res = page.evaluate(
 		(selector, expected) => {
 			return document
 				.querySelector(selector)
@@ -21,6 +21,7 @@ function containsText(page, selector, expected) {
 		selector,
 		expected
 	);
+	return res;
 }
 
 module.exports = {

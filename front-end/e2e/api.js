@@ -25,13 +25,15 @@ const headers = { 'Content-Type': 'application/json' };
  */
 async function fetchJson(url, options, onCancel) {
 	try {
-		const response = await fetch(url, options);
+		const response = await fetch(url, options).then((res) => {
+			return res;
+		});
 
 		if (response.status === 204) {
 			return null;
 		}
 
-		const payload = await response.json();
+		const payload = await response?.json();
 
 		if (payload.error) {
 			return Promise.reject({ message: payload.error });
@@ -39,6 +41,7 @@ async function fetchJson(url, options, onCancel) {
 		return payload.data;
 	} catch (error) {
 		if (error.name !== 'AbortError') {
+			console.error(error);
 			console.error(error.stack);
 			throw error;
 		}

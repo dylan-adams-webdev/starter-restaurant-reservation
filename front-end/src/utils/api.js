@@ -1,90 +1,83 @@
-/**
- * Defines the base URL for the API.
- * The default values is overridden by the `API_BASE_URL` environment variable.
- */
-import formatReservationDate from './format-reservation-date';
-import formatReservationTime from './format-reservation-date';
+const axios = require('axios');
 
 const API_BASE_URL =
 	process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000';
 
-/**
- * Defines the default headers for these functions to work with `json-server`
- */
-const headers = new Headers();
-headers.append('Content-Type', 'application/json');
+const list = async (url, signal, params) => {
+	const { data } = await axios.get(url, { signal, params }).catch((err) => {
+		return new Error(err.response.data?.error);
+	});
+	return data;
+};
 
-/**
- * Fetch `json` from the specified URL and handle error status codes and ignore `AbortError`s
- *
- * This function is NOT exported because it is not needed outside of this file.
- *
- * @param url
- *  the url for the requst.
- * @param options
- *  any options for fetch
- * @param onCancel
- *  value to return if fetch call is aborted. Default value is undefined.
- * @returns {Promise<Error|any>}
- *  a promise that resolves to the `json` data or an error.
- *  If the response is not in the 200 - 399 range the promise is rejected.
- */
-async function fetchJson(url, options, onCancel) {
-	try {
-		const response = await fetch(url, options);
+const create = async (url, data) => {
+	const res = await axios.post(url, { data }).catch((err) => {
+		throw new Error(err.response.data.error);
+	});
+	return res.data;
+};
 
-		if (response.status === 204) {
-			return null;
-		}
+export const listReservations = (signal, params = {}) => {
+	const url = `${API_BASE_URL}/reservations/`;
+	return list(url, signal, params);
+};
 
-		const payload = await response.json();
+export const listTables = (signal, params = {}) => {
+	const url = `${API_BASE_URL}/tables/`;
+	return list(url, signal, params);
+};
 
-		if (payload.error) {
-			return Promise.reject({ message: payload.error });
-		}
-		return payload.data;
-	} catch (error) {
-		if (error.name !== 'AbortError') {
-			console.error(error.stack);
-			throw error;
-		}
-		return Promise.resolve(onCancel);
-	}
-}
+export const newReservation = (body) => {
+	const url = `${API_BASE_URL}/reservations/`;
+	return create(url, body);
+};
 
-/**
- * Retrieves all existing reservation.
- * @returns {Promise<[reservation]>}
- *  a promise that resolves to a possibly empty array of reservation saved in the database.
- */
+export const seatReservation = ({ reservation_id, table_id }) => {
+	const url = `${API_BASE_URL}/tables/${table_id}/seat/`;
+	return axios.put(url, { data: { reservation_id } }).catch((err) => {
+		throw new Error(err.response.data.error);
+	});
+};
 
-export async function listReservations(params, signal) {
-	const url = new URL(`${API_BASE_URL}/reservations`);
-	Object.entries(params).forEach(([key, value]) =>
-		url.searchParams.append(key, value)
-	);
-	return await fetchJson(url, { headers, signal }, [])
-		.then(formatReservationDate)
-		.then(formatReservationTime);
-}
+export const newTable = (body) => {
+	const url = `${API_BASE_URL}/tables/`;
+	return create(url, body);
+};
 
-export async function newReservation(data, signal) {
-	const url = new URL(`${API_BASE_URL}/reservations`);
-	try {
-		const res = await fetch(url, {
-			method: 'POST',
-			headers,
-			body: JSON.stringify({data: data}),
-			signal,
+export const finishTable = (table_id) => {
+	const url = `${API_BASE_URL}/tables/${table_id}/seat`;
+	return axios.delete(url, { data: { table_id } }).catch((err) => {
+		throw new Error(err.response.data.error);
+	});
+};
+
+export const updateStatus = ({ reservation_id, status }) => {
+	const url = `${API_BASE_URL}/reservations/${reservation_id}/status`;
+	return axios.put(url, { data: { status } }).catch((err) => {
+		throw new Error(err.response.data.error);
+	});
+};
+
+export const listReservationsByPhone = ({ signal, phone }) => {
+	const url = `${API_BASE_URL}/reservations/`;
+	const params = new URLSearchParams();
+	params.append('mobile_number', phone);
+	return list(url, signal, params);
+};
+
+export const cancelReservation = ({ reservation_id }) => {
+	const url = `${API_BASE_URL}/reservations/${reservation_id}/status`;
+	const body = { status: 'cancelled' };
+	return axios
+		.put(url, { data: body })
+		.catch((err) => {
+			throw new Error(err.response.data.error);
 		});
-		const payload = await res.json();
-		console.log(payload);
-		if (payload.error) return Promise.reject({ message: payload.error });
-		return payload.data;
-	} catch (err) {
-		if (err.name !== 'AbortError') {
-			throw err;
-		}
-		return Promise.resolve();
-	}
-}
+};
+
+export const editReservation = ({ data }) => {
+	const url = `${API_BASE_URL}/reservations/${data.reservation_id}`;
+	return axios.put(url, { data }).catch((err) => {
+		throw new Error(err.response?.data.error);
+	});
+};
