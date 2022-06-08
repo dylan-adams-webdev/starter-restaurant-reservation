@@ -9,7 +9,7 @@ export default function CreateTable() {
 	const queryClient = useQueryClient();
 	const query = useMutation(newTable, {
 		onSuccess: () => {
-			console.log(query.error); history.push('/dashboard')
+			history.push('/dashboard')
 		},
 		onSettled: () => queryClient.invalidateQueries('tables'),
 	})
