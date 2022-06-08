@@ -21,7 +21,7 @@ export default function Dashboard() {
 	const [dateString, setDateString] = useState(initialDate);
 
 	const abort = new AbortController();
-	
+
 	const reservations = useQuery('reservations', () =>
 		listReservations(abort.signal)
 	);
@@ -55,10 +55,14 @@ export default function Dashboard() {
 		(!reservations.error &&
 			reservations.data.data.filter((res) => {
 				const date = dt.fromISO(dateString);
-				return dt.fromISO(res.reservation_date).hasSame(date, 'day');
+				const isSameDate = dt
+					.fromISO(res.reservation_date)
+					.hasSame(date, 'day');
+				const isNotFinished = res.status !== 'finished';
+				return isNotFinished && isSameDate;
 			})) ||
 		null;
-	
+
 	const tableList = (!tables.error && tables.data.data) || null;
 
 	return (
