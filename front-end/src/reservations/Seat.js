@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import { useParams, useHistory } from 'react-router';
 import { listTables, seatReservation } from '../utils/api';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
@@ -38,6 +38,7 @@ export default function Seat() {
 				{table.table_name} - {table.capacity}
 			</option>
 		);
+		return null;
 	});
 
 	return (

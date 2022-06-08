@@ -11,6 +11,7 @@ const listAll = () => {
 const listForDate = (date) => {
 	return knex('reservations')
 		.where({ reservation_date: date })
+		.whereNot({status: 'finished'})
 		.orderBy('reservation_time');
 };
 
