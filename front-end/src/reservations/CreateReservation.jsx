@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useHistory } from 'react-router';
-import ReservationForm from './ReservationForm';
+import ReservationForm from '../common/ReservationForm';
 import ErrorAlert from '../error/ErrorAlert';
 import { newReservation } from '../utils/api';
 import { DateTime as dt, Duration, Interval } from 'luxon';
