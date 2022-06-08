@@ -21,6 +21,7 @@ export default function Dashboard() {
 	const [dateString, setDateString] = useState(initialDate);
 
 	const abort = new AbortController();
+	
 	const reservations = useQuery('reservations', () =>
 		listReservations(abort.signal)
 	);
@@ -57,9 +58,8 @@ export default function Dashboard() {
 				return dt.fromISO(res.reservation_date).hasSame(date, 'day');
 			})) ||
 		null;
-
+	
 	const tableList = (!tables.error && tables.data.data) || null;
-	console.log('tl', tableList);
 
 	return (
 		<main>
@@ -70,13 +70,13 @@ export default function Dashboard() {
 			</div>
 			<DateButtonGroup nav={nextOrPreviousDate} />
 			<div className='row mt-3'>
-				<div className='col-md-10'>
+				<div className='col-md-9'>
 					<ReservationList
 						reservations={reservationList}
-						tables={tableList}
+						onEmpty={'No reservations found'}
 					/>
 				</div>
-				<div className='col-md-2'>
+				<div className='col-md-3'>
 					<TableList tables={tableList} />
 				</div>
 			</div>

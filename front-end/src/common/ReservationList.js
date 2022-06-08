@@ -5,7 +5,7 @@ export default function ReservationList({ reservations, onEmpty }) {
 	if (!reservations?.length) return <span>{onEmpty}</span>;
 
 	const content = reservations.map((res) => {
-		<ReservationCard key={res.reservation_id} res={res} />;
+		return <ReservationCard key={res.reservation_id} res={res} />;
 	});
 
 	return <div className='row'>{content}</div>;
