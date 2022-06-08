@@ -30,7 +30,7 @@ export default function Seat() {
 	}
 
 	if (tables.isLoading) return '...loading';
-	console.log(tables);
+
 
 	const options = tables.data.data.map((table) => {
 		if(!table.reservation_id) return (
