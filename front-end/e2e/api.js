@@ -26,8 +26,6 @@ const headers = { 'Content-Type': 'application/json' };
 async function fetchJson(url, options, onCancel) {
 	try {
 		const response = await fetch(url, options).then((res) => {
-			console.log('RESPONSE:', res);
-			console.log('#################################');
 			return res;
 		});
 
