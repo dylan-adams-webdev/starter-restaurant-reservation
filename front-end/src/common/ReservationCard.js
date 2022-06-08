@@ -15,16 +15,18 @@ export default function ReservationCard(props) {
 	const client = useQueryClient();
 	const query = useMutation(cancelReservation, {
 		onSuccess: () => toast.success('Reservation is cancelled'),
-		onError: toast.error,
+		onError: (err) => toast.error(err),
 		onSettled: () => client.invalidateQueries('reservations')
 	})
 	
 	const cancelHandler = () => {
-		const confirm = window.confirm('Do you want to cancel this reseration?\nThis cannot be undone.');
+		const confirm = window.confirm(
+			'Do you want to cancel this reservation?\nThis cannot be undone.'
+		);
 		if (confirm) query.mutate({reservation_id: res.reservation_id});
 	}
 
-	return (
+	return res.status !== 'cancelled' && (
 		<div className='col-md-4 m-2'>
 			<div className='card'>
 				<div className='card-body'>
@@ -58,21 +60,25 @@ export default function ReservationCard(props) {
 					</div>
 					<div className='d-flex justify-content-between mt-2'>
 						<div>
-							<Link
-								to={`/reservations/${res.reservation_id}/edit`}
-								href={`/reservations/${res.reservation_id}/edit`}
-								className='btn btn-outline-secondary me-2'
-							>
-								Edit
-							</Link>
-							<button
-								type='button'
-								data-reservation-id-cancel={res.reservation_id}
-								onClick={cancelHandler}
-								className='btn btn-outline-danger'
-							>
-								Cancel
-							</button>
+							{res.status === 'booked' ? (
+								<Link
+									to={`/reservations/${res.reservation_id}/edit`}
+									href={`/reservations/${res.reservation_id}/edit`}
+									className='btn btn-outline-secondary me-2'
+								>
+									Edit
+								</Link>
+							) : (null)}
+							{res.status !== 'cancelled' ? (
+								<button
+									type='button'
+									data-reservation-id-cancel={res.reservation_id}
+									onClick={cancelHandler}
+									className='btn btn-outline-danger'
+								>
+									Cancel
+								</button>
+							) : (null)}
 						</div>
 						<div>
 							{res.status === 'booked' ? (
