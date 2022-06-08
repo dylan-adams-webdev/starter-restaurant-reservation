@@ -1,13 +1,13 @@
 const dates = require('date-and-time');
 const service = require('./reservations.service');
-const common = require('../common/common.service');
 const validator = require('../common/validations');
 const asyncError = require('../errors/asyncErrorBoundary');
 
 /**
  * List handler for reservation resources
  */
-const list = async (req, res, next) => {
+const list = async (req, res) => {
+	req.log.warn({request: req.orinalUrl})
 	const { date, mobile_number } = req.query;
 	let data;
 	if (date) {
@@ -16,8 +16,9 @@ const list = async (req, res, next) => {
 		data = await service.listByPhone(mobile_number);
 	} else {
 		data = await service.listAll();
+		req.log.info({data})
 	}
-	req.log.debug({ data });
+	req.log.debug({ data: data.length });
 	res.json({ data });
 };
 
