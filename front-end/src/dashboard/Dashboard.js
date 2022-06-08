@@ -54,6 +54,7 @@ export default function Dashboard() {
 				const date = dt.fromISO(dateString);
 				const isSameDate = dt
 					.fromISO(res.reservation_date)
+					.toLocal()
 					.hasSame(date, 'day');
 				const isNotFinished = res.status !== 'finished';
 				return isNotFinished && isSameDate;

@@ -26,7 +26,7 @@ export default function ReservationCard(props) {
 		if (confirm) query.mutate({reservation_id: res.reservation_id});
 	}
 
-	return res.status !== 'cancelled' && (
+	return  (
 		<div className='col-md-4 m-2'>
 			<div className='card'>
 				<div className='card-body'>
@@ -69,7 +69,7 @@ export default function ReservationCard(props) {
 									Edit
 								</Link>
 							) : (null)}
-							{res.status !== 'cancelled' ? (
+							{(res.status === 'booked' || res.status === 'seated') ? (
 								<button
 									type='button'
 									data-reservation-id-cancel={res.reservation_id}

@@ -10,6 +10,7 @@ export default function CreateReservation() {
 	const queryClient = useQueryClient();
 	const { mutate, isLoading, error } = useMutation(newReservation, {
 		onSuccess: (data) => {
+			console.log(data.data.reservation_date);
 			history.push({
 				pathname: '/dashboard',
 				search: `?date=${data.data.reservation_date}`,
