@@ -35,7 +35,7 @@ export const newReservation = (body) => {
 
 export const seatReservation = ({ reservation_id, table_id }) => {
 	const url = `${API_BASE_URL}/tables/${table_id}/seat/`;
-	return axios.put(url, { data: { reservation_id } }).catch(err => {
+	return axios.put(url, { data: { reservation_id } }).catch((err) => {
 		throw new Error(err.response.data.error);
 	});
 };
@@ -43,20 +43,38 @@ export const seatReservation = ({ reservation_id, table_id }) => {
 export const newTable = (body) => {
 	const url = `${API_BASE_URL}/tables/`;
 	return create(url, body);
-}
+};
 
 export const finishTable = (table_id) => {
 	const url = `${API_BASE_URL}/tables/${table_id}/seat`;
-	return axios.delete(url, { data: { table_id } }).catch(err => {
+	return axios.delete(url, { data: { table_id } }).catch((err) => {
 		throw new Error(err.response.data.error);
 	});
-}
+};
 
 export const updateStatus = ({ reservation_id, status }) => {
 	console.log('resId:', { data: { status } });
 	const url = `${API_BASE_URL}/reservations/${reservation_id}/status`;
 	console.log(url);
-	return axios.put(url, { data: { status } }).catch(err => {
+	return axios.put(url, { data: { status } }).catch((err) => {
 		throw new Error(err.response.data.error);
 	});
-}
+};
+
+export const listReservationsByPhone = ({ signal, phone }) => {
+	const url = `${API_BASE_URL}/reservations/`;
+	const params = new URLSearchParams();
+	params.append('mobile_number', phone);
+	return list(url, signal, params);
+};
+
+export const cancelReservation = ({ reservation_id }) => {
+	const url = `${API_BASE_URL}/reservations/${reservation_id}/status`;
+	const body = { status: 'cancelled' };
+	return axios
+		.put(url, { data: body })
+		.then((res) => res.json())
+		.catch((err) => {
+			throw new Error(err.response?.data.error);
+		});
+};
