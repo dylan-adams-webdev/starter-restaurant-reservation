@@ -5,7 +5,7 @@ const API_BASE_URL =
 
 const list = async (url, signal, params) => {
 	const { data } = await axios.get(url, { signal, params }).catch((err) => {
-		return new Error(err.response.data.error);
+		return new Error(err.response.data?.error);
 	});
 	return data;
 };
@@ -28,7 +28,6 @@ export const listTables = (signal, params = {}) => {
 };
 
 export const newReservation = (body) => {
-	console.log('body:', body);
 	const url = `${API_BASE_URL}/reservations/`;
 	return create(url, body);
 };
@@ -53,9 +52,7 @@ export const finishTable = (table_id) => {
 };
 
 export const updateStatus = ({ reservation_id, status }) => {
-	console.log('resId:', { data: { status } });
 	const url = `${API_BASE_URL}/reservations/${reservation_id}/status`;
-	console.log(url);
 	return axios.put(url, { data: { status } }).catch((err) => {
 		throw new Error(err.response.data.error);
 	});
@@ -73,8 +70,14 @@ export const cancelReservation = ({ reservation_id }) => {
 	const body = { status: 'cancelled' };
 	return axios
 		.put(url, { data: body })
-		.then((res) => res.json())
 		.catch((err) => {
-			throw new Error(err.response?.data.error);
+			throw new Error(err.response.data.error);
 		});
+};
+
+export const editReservation = ({ data }) => {
+	const url = `${API_BASE_URL}/reservations/${data.reservation_id}`;
+	return axios.put(url, { data }).catch((err) => {
+		throw new Error(err.response?.data.error);
+	});
 };
