@@ -4,7 +4,6 @@ import CreateTable from './CreateTable';
 
 export default function Tables() {
 	const { path } = useRouteMatch();
-	console.log(path);
   return (
 	  <Switch>
 		  <Route path={`${path}/new`}>
