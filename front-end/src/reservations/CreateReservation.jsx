@@ -26,6 +26,7 @@ export default function CreateReservation() {
 
 	const submitHandler = (data) => {
 		data = { ...data, status: 'booked' };
+		console.log(data);
 		if (validationError) setValidationError(null);
 		if (!reservationDateTimeIsValid(data)) {
 			setValidationError(
@@ -34,6 +35,7 @@ export default function CreateReservation() {
 				)
 			);
 		} else {
+			console.log(data);
 			mutate(data);
 		}
 	};
