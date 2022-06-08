@@ -18,10 +18,10 @@ const logging = expressPino({
 	logger: logger,
 	autoLogging: true,
 	level: process.env.LOG_LEVEL || 'info',
-})
+});
 
-app.use(cors());
-app.use(express.json())
+app.use(cors({ origin: '*' }));
+app.use(express.json());
 app.use(logging);
 
 app.use('/reservations', reservationsRouter);

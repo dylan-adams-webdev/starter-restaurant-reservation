@@ -8,10 +8,6 @@ import ReservationList from '../common/ReservationList';
 import TableList from './TableList';
 import { useQuery } from 'react-query';
 
-/**
- * Defines the dashboard page.
- * @returns {JSX.Element}
- */
 export default function Dashboard() {
 	const hx = useHistory();
 	const { search } = hx.location;
