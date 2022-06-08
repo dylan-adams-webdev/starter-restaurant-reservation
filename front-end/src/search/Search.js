@@ -1,33 +1,34 @@
 import React, { useState } from 'react';
-import { useQuery } from 'react-query';
+import toast from 'react-hot-toast';
+import { useMutation, useQueryClient } from 'react-query';
 import ReservationList from '../common/ReservationList';
-import { listReservations } from '../utils/api';
+import { listReservationsByPhone } from '../utils/api';
 
 export default function Search() {
 	const initialState = { mobile_number: '' };
 
 	const [formData, setFormData] = useState(initialState);
-	const [matchingReservatins, setMatchingReservations] = useState([]);
 
 	const abort = new AbortController();
 
-	const query = useQuery('reservations', () =>
-		listReservations(abort.signal)
-	);
+	const client = useQueryClient();
+	const query = useMutation(listReservationsByPhone, {
+		onError: toast.error,
+		onSettled: () => client.invalidateQueries('reservations')
+});
 
 	const submitHandler = (event) => {
-		event.preventDefault();
-		const match = query.data.data.filter((res) => {
-			const a = res.mobile_number.replace(/\D/g, '');
-			const b = formData.mobile_number.replace(/\D/g, '');
-			return b.includes(a);
+		query.mutate({
+			signal: abort.signal,
+			phone: formData.mobile_number,
 		});
-		setMatchingReservations(match);
 	};
 
 	const changeHandler = ({ target }) => {
 		setFormData({ ...formData, [target.name]: target.value });
 	};
+	
+	if (query.isLoading) return '...loading';
 
 	return (
 		<>
@@ -47,7 +48,7 @@ export default function Search() {
 				</div>
 			</form>
 			<ReservationList
-				reservations={matchingReservatins}
+				reservations={query.data?.data}
 				onEmpty={'No reservations found'}
 			/>
 		</>
