@@ -1,10 +1,10 @@
 import React from 'react';
 import { useState } from 'react';
 import { useHistory } from 'react-router';
-import { DateTime as dt} from 'luxon';
+import { DateTime as dt } from 'luxon';
 
 export default function ReservationForm(props) {
-	const {
+	let {
 		initialState = {
 			first_name: '',
 			last_name: '',
@@ -16,6 +16,11 @@ export default function ReservationForm(props) {
 		submitHandler,
 	} = props;
 
+	initialState = {
+		...initialState,
+		reservation_date: dt.fromISO(initialState.reservation_date).toLocal().toISODate(),
+	};
+
 	const history = useHistory();
 
 	const [formData, setFormData] = useState(initialState);
@@ -25,18 +30,16 @@ export default function ReservationForm(props) {
 			let num = target.value;
 			num = num.replace(/\D/g, '');
 			num = num.substring(0, 10);
-			console.log(num);
 			if (num.length <= 6 && num.length > 2) {
 				num = `(${num.substring(0, 3)}) ${num.substring(3)}`;
 			} else if (num.length >= 7) {
-				let newNum = `(${num.substring(0, 3)}) ${num.substring(3, 6)}-`
+				let newNum = `(${num.substring(0, 3)}) ${num.substring(3, 6)}-`;
 				newNum = newNum.concat(num.substring(6));
 				num = newNum;
 			}
-			console.log('after', num);
 			setFormData({ ...formData, mobile_number: num });
 		} else if (target.name === 'people') {
-			setFormData({...formData, people: Number(target.value)})
+			setFormData({ ...formData, people: Number(target.value) });
 		} else {
 			setFormData({
 				...formData,
@@ -49,8 +52,11 @@ export default function ReservationForm(props) {
 		event.preventDefault();
 		let num = formData.mobile_number;
 		num = num.replace(/\D/g, '');
-		num = num.substring(0, 3) + '-' +
-			num.substring(3, 6) + '-' +
+		num =
+			num.substring(0, 3) +
+			'-' +
+			num.substring(3, 6) +
+			'-' +
 			num.substring(6);
 		const sani = {
 			...formData,
@@ -149,7 +155,8 @@ export default function ReservationForm(props) {
 				<button
 					type='button'
 					onClick={cancelHandler}
-					className='btn btn-secondary'>
+					className='btn btn-secondary'
+				>
 					Cancel
 				</button>
 				<button type='submit' className='btn btn-primary m-2'>
