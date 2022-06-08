@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { DateTime as dt } from 'luxon';
 import { useHistory } from 'react-router';
-import { listReservations } from '../utils/api';
+import { listReservations, listTables } from '../utils/api';
 import ErrorAlert from '../error/ErrorAlert';
 import DateButtonGroup from './DateButtonGroup';
-import ReservationList from './ReservationList';
+import ReservationList from '../common/ReservationList';
+import TableList from './TableList';
 import { useQuery } from 'react-query';
 
 /**
@@ -18,11 +19,12 @@ export default function Dashboard() {
 	const initialDate = queryParam || dt.now().toISODate();
 
 	const [dateString, setDateString] = useState(initialDate);
+
 	const abort = new AbortController();
-	const { data, error, isLoading } = useQuery(
-		'reservations',
-		() => listReservations({dateString: dateString} , abort.signal)
+	const reservations = useQuery('reservations', () =>
+		listReservations(abort.signal)
 	);
+	const tables = useQuery('tables', () => listTables(abort.signal));
 
 	useEffect(updateSearchQuery, [dateString, hx]);
 
@@ -30,11 +32,11 @@ export default function Dashboard() {
 		hx.push({ pathname: '/dashboard', search: `?date=${dateString}` });
 	}
 
-	/**
-	 * Change the date of reservations to be displayed
-	 * @param value -1 for prev, 0 for today, 1 for next
-	 */
 	function nextOrPreviousDate(value) {
+		if (!value) {
+			const now = dt.now().toISODate();
+			return setDateString(now);
+		}
 		const newDateString = dt
 			.fromISO(dateString)
 			.plus({ days: value })
@@ -42,20 +44,42 @@ export default function Dashboard() {
 		setDateString(newDateString);
 	}
 
+	if (reservations.isLoading || tables.isLoading) return '...loading';
+
 	const reservationViewDate = dt.fromISO(dateString).hasSame(dt.now(), 'day')
 		? 'today'
 		: dt.fromISO(dateString).toLocaleString(dt.DATE_HUGE);
 
-	if (isLoading) return '...loading';
+	const reservationList =
+		(!reservations.error &&
+			reservations.data.data.filter((res) => {
+				const date = dt.fromISO(dateString);
+				return dt.fromISO(res.reservation_date).hasSame(date, 'day');
+			})) ||
+		null;
+
+	const tableList = (!tables.error && tables.data.data) || null;
+	console.log('tl', tableList);
+
 	return (
 		<main>
-			<ErrorAlert error={error} />
+			<ErrorAlert error={reservations.error} />
 			<h1>Dashboard</h1>
 			<div className='d-md-flex mb-3'>
 				<h4 className='mb-0'>Reservations for {reservationViewDate}</h4>
 			</div>
 			<DateButtonGroup nav={nextOrPreviousDate} />
-			<ReservationList reservations={data} />
+			<div className='row mt-3'>
+				<div className='col-md-10'>
+					<ReservationList
+						reservations={reservationList}
+						tables={tableList}
+					/>
+				</div>
+				<div className='col-md-2'>
+					<TableList tables={tableList} />
+				</div>
+			</div>
 		</main>
 	);
 }

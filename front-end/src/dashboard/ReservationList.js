@@ -1,5 +1,5 @@
 import React from 'react';
-import ReservationCard from './ReservationCard';
+import ReservationCard from '../common/ReservationCard';
 
 export default function ReservationList({ reservations }) {
 	console.log(reservations);

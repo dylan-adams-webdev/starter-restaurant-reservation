@@ -6,7 +6,7 @@ export default function TableForm(props) {
 		submitHandler,
 		initialState = {
 			table_name: '',
-			capacity: '1',
+			capacity: 0,
 		},
 	} = props;
 
@@ -20,6 +20,8 @@ export default function TableForm(props) {
 	};
 
 	const changeHandler = ({ target }) => {
+		if (target.name === 'capacity')
+			return setFormData({ ...formData, capacity: Number(target.value) });
 		setFormData({ ...formData, [target.name]: target.value });
 	};
 
@@ -37,6 +39,7 @@ export default function TableForm(props) {
 						name='table_name'
 						className='form-control'
 						id='table_name'
+						minLength={2}
 						onChange={changeHandler}
 						value={formData.table_name}
 						required
@@ -50,7 +53,7 @@ export default function TableForm(props) {
 						className='form-control'
 						id='capacity'
 						onChange={changeHandler}
-						value={formData.capacity || 1}
+						value={formData.capacity}
 						min='1'
 						required
 					/>
@@ -61,7 +64,8 @@ export default function TableForm(props) {
 				<button
 					type='button'
 					onClick={cancelHandler}
-					className='btn btn-secondary'>
+					className='btn btn-secondary'
+				>
 					Cancel
 				</button>
 				<button type='submit' className='btn btn-primary m-2'>

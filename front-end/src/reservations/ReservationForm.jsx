@@ -1,6 +1,7 @@
 import React from 'react';
 import { useState } from 'react';
 import { useHistory } from 'react-router';
+import { DateTime as dt} from 'luxon';
 
 export default function ReservationForm(props) {
 	const {
@@ -8,7 +9,7 @@ export default function ReservationForm(props) {
 			first_name: '',
 			last_name: '',
 			mobile_number: '',
-			reservation_date: '',
+			reservation_date: dt.now().toISODate(),
 			reservation_time: '',
 			people: 1,
 		},
@@ -20,15 +21,42 @@ export default function ReservationForm(props) {
 	const [formData, setFormData] = useState(initialState);
 
 	const changeHandler = ({ target }) => {
-		setFormData({
-			...formData,
-			[target.name]: target.value,
-		});
+		if (target.name === 'mobile_number') {
+			let num = target.value;
+			num = num.replace(/\D/g, '');
+			num = num.substring(0, 10);
+			console.log(num);
+			if (num.length <= 6 && num.length > 2) {
+				num = `(${num.substring(0, 3)}) ${num.substring(3)}`;
+			} else if (num.length >= 7) {
+				let newNum = `(${num.substring(0, 3)}) ${num.substring(3, 6)}-`
+				newNum = newNum.concat(num.substring(6));
+				num = newNum;
+			}
+			console.log('after', num);
+			setFormData({ ...formData, mobile_number: num });
+		} else if (target.name === 'people') {
+			setFormData({...formData, people: Number(target.value)})
+		} else {
+			setFormData({
+				...formData,
+				[target.name]: target.value,
+			});
+		}
 	};
-	
+
 	const onSubmit = (event) => {
 		event.preventDefault();
-		submitHandler(formData);
+		let num = formData.mobile_number;
+		num = num.replace(/\D/g, '');
+		num = num.substring(0, 3) + '-' +
+			num.substring(3, 6) + '-' +
+			num.substring(6);
+		const sani = {
+			...formData,
+			mobile_number: num,
+		};
+		submitHandler(sani);
 	};
 
 	const cancelHandler = () => {
@@ -70,8 +98,7 @@ export default function ReservationForm(props) {
 						<span className='input-group-text'>+1</span>
 						<input
 							type='tel'
-							pattern='[0-9]{3}-[0-9]{3}-[0-9]{4}'
-							placeholder='123-456-7890'
+							placeholder='numbers only'
 							name='mobile_number'
 							className='form-control'
 							id='mobile_number'

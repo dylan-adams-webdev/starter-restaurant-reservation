@@ -6,7 +6,7 @@
 	"trailingComma": "es5",
 	"semi": true,
 	"bracketSpacing": true,
-	"bracketSameLine": true,
+	"bracketSameLine": false,
 	"htmlWhitespaceSensitivity": "strict",
 	"endOfLine": "lf"
 }
