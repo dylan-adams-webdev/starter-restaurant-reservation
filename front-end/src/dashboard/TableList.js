@@ -18,7 +18,6 @@ export default function TableList({ tables }) {
 		const confirm = window.confirm(
 			'Is this table ready to seat new guests?\nThis cannot be undone.'
 		);
-		console.log("AT FINISH FUNCTION IN TABLE_LIST", table_id);
 		if (confirm) query.mutate({table_id});
 	};
 

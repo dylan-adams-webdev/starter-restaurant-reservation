@@ -58,7 +58,6 @@ export default function Dashboard() {
 		null;
 
 	const tableList = (!tables.error && tables.data) || null;
-	console.log(tableList);
 
 	return (
 		<main>
