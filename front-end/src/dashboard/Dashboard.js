@@ -8,7 +8,6 @@ import ReservationList from '../common/ReservationList';
 import TableList from './TableList';
 import { useQuery } from 'react-query';
 
-
 export default function Dashboard() {
 	const hx = useHistory();
 	const { search } = hx.location;
@@ -17,12 +16,8 @@ export default function Dashboard() {
 
 	const [dateString, setDateString] = useState(initialDate);
 
-	const abort = new AbortController();
-
-	const reservations = useQuery('reservations', () =>
-		listReservations(abort.signal)
-	);
-	const tables = useQuery('tables', () => listTables(abort.signal));
+	const reservations = useQuery('reservations', listReservations);
+	const tables = useQuery('tables', listTables);
 
 	useEffect(updateSearchQuery, [dateString, hx]);
 
@@ -44,13 +39,14 @@ export default function Dashboard() {
 
 	if (reservations.isLoading || tables.isLoading) return '...loading';
 
-	const reservationViewDate = dt.fromISO(dateString).hasSame(dt.now(), 'day')
-		? 'today'
-		: dt.fromISO(dateString).toLocaleString(dt.DATE_HUGE);
+	const reservationViewDate =
+		dateString === dt.now().toISODate()
+			? 'today'
+			: dt.fromISO(dateString).toLocaleString(dt.DATE_HUGE);
 
 	const reservationList =
 		(!reservations.error &&
-			reservations.data.data.filter((res) => {
+			reservations.data.filter((res) => {
 				const date = dt.fromISO(dateString);
 				const isSameDate = dt
 					.fromISO(res.reservation_date)
@@ -61,7 +57,8 @@ export default function Dashboard() {
 			})) ||
 		null;
 
-	const tableList = (!tables.error && tables.data.data) || null;
+	const tableList = (!tables.error && tables.data) || null;
+	console.log(tableList);
 
 	return (
 		<main>

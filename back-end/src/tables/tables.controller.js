@@ -40,7 +40,9 @@ const list = async (req, res) => {
 const create = async (req, res) => {
 	const result = await service.create(req.body.data);
 	req.log.warn({ data: { table_id: result, ...req.body.data } });
-	res.status(201).json({ data: { table_id: result.table_id, ...req.body.data } });
+	res.status(201).json({
+		data: { table_id: result.table_id, ...req.body.data },
+	});
 };
 
 const getReservation = async (req, res, next) => {
@@ -116,14 +118,15 @@ const seat = async (req, res) => {
 			status: 'seated',
 		},
 	});
-	res.json({data: {status: 'seated'}});
+	res.json({ data: { status: 'seated' } });
 };
 
 const finish = async (req, res) => {
+	req.log.warn({ request_data: req.body.data });
 	const { tableId } = req.params;
 	const { reservation } = res.locals;
 	await commonService.unSeatReservation(reservation.reservation_id, tableId);
-	res.sendStatus(200);
+	res.json({});
 };
 
 module.exports = {

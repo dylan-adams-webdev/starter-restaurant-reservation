@@ -69,7 +69,7 @@ export default function ReservationCard(props) {
 									Edit
 								</Link>
 							) : (null)}
-							{(res.status === 'booked' || res.status === 'seated') ? (
+							{(res.status === 'booked') ? (
 								<button
 									type='button'
 									data-reservation-id-cancel={res.reservation_id}

@@ -8,9 +8,8 @@ export default function Seat() {
 	const { reservation_id } = useParams();
 	const history = useHistory();
 
-	const abort = new AbortController();
 	const client = useQueryClient();
-	const tables = useQuery('tables', () => listTables(abort.signal));
+	const tables = useQuery('tables', listTables);
 	const seat = useMutation(seatReservation, {
 		onError: toast.error,
 		onSuccess: () => {
@@ -32,7 +31,7 @@ export default function Seat() {
 	if (tables.isLoading) return '...loading';
 
 
-	const options = tables.data.data.map((table) => {
+	const options = tables.data.map((table) => {
 		if(!table.reservation_id) return (
 			<option key={table.table_id} value={table.table_id}>
 				{table.table_name} - {table.capacity}

@@ -9,25 +9,21 @@ export default function Search() {
 
 	const [formData, setFormData] = useState(initialState);
 
-	const abort = new AbortController();
-
 	const client = useQueryClient();
 	const query = useMutation(listReservationsByPhone, {
 		onError: toast.error,
-		onSettled: () => client.invalidateQueries('reservations')
-});
+		onSettled: () => client.invalidateQueries('reservations'),
+	});
 
 	const submitHandler = (event) => {
-		query.mutate({
-			signal: abort.signal,
-			phone: formData.mobile_number,
-		});
+		event.preventDefault();
+		query.mutate(formData.mobile_number);
 	};
 
 	const changeHandler = ({ target }) => {
 		setFormData({ ...formData, [target.name]: target.value });
 	};
-	
+
 	if (query.isLoading) return '...loading';
 
 	return (
@@ -48,7 +44,7 @@ export default function Search() {
 				</div>
 			</form>
 			<ReservationList
-				reservations={query.data?.data}
+				reservations={query.data}
 				onEmpty={'No reservations found'}
 			/>
 		</>

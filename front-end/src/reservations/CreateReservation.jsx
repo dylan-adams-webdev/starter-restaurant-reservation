@@ -10,10 +10,9 @@ export default function CreateReservation() {
 	const queryClient = useQueryClient();
 	const { mutate, isLoading, error } = useMutation(newReservation, {
 		onSuccess: (data) => {
-			console.log(data.data.reservation_date);
 			history.push({
 				pathname: '/dashboard',
-				search: `?date=${data.data.reservation_date}`,
+				search: `?date=${data.reservation_date}`,
 			});
 		},
 		onSettled: () => {
@@ -27,7 +26,6 @@ export default function CreateReservation() {
 
 	const submitHandler = (data) => {
 		data = { ...data, status: 'booked' };
-		console.log(data);
 		if (validationError) setValidationError(null);
 		if (!reservationDateTimeIsValid(data)) {
 			setValidationError(
@@ -36,7 +34,6 @@ export default function CreateReservation() {
 				)
 			);
 		} else {
-			console.log(data);
 			mutate(data);
 		}
 	};

@@ -9,13 +9,10 @@ import { useMutation, useQuery, useQueryClient } from 'react-query';
 export default function EditReservation() {
 	const resId = useParams().reservation_id;
 	const queryClient = useQueryClient();
-	const abort = new AbortController();
-	const reservations = useQuery('reservations', () =>
-		listReservations(abort.signal)
-	);
+	const reservations = useQuery('reservations', listReservations);
 	const { mutate, isLoading, error } = useMutation(editReservation, {
 		onSuccess: (data) => {
-			const date = data.data.data.reservation_date;
+			const date = data.reservation_date;
 			history.push({
 				pathname: '/dashboard',
 				search: `?date=${dt.fromISO(date).toISODate()}`,
@@ -66,7 +63,7 @@ export default function EditReservation() {
 
 	if (isLoading || reservations.isLoading) return '...loading';
 
-	const reservation = reservations.data.data.find(
+	const reservation = reservations.data.find(
 		(res) => res.reservation_id === Number(resId)
 	);
 
