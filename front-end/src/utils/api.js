@@ -70,10 +70,10 @@ export const seatReservation = ({ reservation_id, table_id }) => {
 // 	return create(url, body);
 // };
 
-export const newTable = ({ body }) => {
+export const newTable = ({ table_name, capacity }) => {
 	const url = `${API_BASE_URL}/tables/`;
-	const options = {method: 'PUT'}
-	return fetchJson(url, options, {body})
+	const options = {method: 'POST'}
+	return fetchJson(url, options, {table_name, capacity})
 }
 
 // // abort controller not required for finish

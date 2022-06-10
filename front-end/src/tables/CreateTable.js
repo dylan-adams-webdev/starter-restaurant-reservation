@@ -15,6 +15,7 @@ export default function CreateTable() {
 	})
 	
 	const submitHandler = (data) => {
+		console.log(data);
 		query.mutate(data)
 	}
 
